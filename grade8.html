@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Scale and Arpeggio Tester (ABRSM Grade 8)</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        .disable-dbl-tap-zoom {
+            touch-action: manipulation;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container p-4 my-4 bg-primary text-white text-center">
+        <h1>Scale and Arpeggio Tester (ABRSM Grade 8)</h1>
+    </div>
+
+    <div class="container text-center">
+        <div class="row">
+            <div class="col">
+                <button type="button" class="btn btn-primary" id="scalesButton" onclick="handleScalesButton()">Scales</button>
+                <button type="button" class="btn btn-primary" id="arpeggiosButton" onclick="handleArpeggiosButton()">Arpeggios</button>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <button type="button" class="btn btn-success mt-2 disable-dbl-tap-zoom" id="nextButton" onclick="handleNextButton()">Next</button>
+                <div class="display-1 pt-4" id="scaleArpText">Some text</div>
+                <div class="display-7 pt-4" id="counterText">Counter</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var pos, currentArray;
+
+        const scales = [
+            "C major, legato, similar motion, &#9833;=176",
+            "C major, staccato, similar motion, &#9833;=176",
+            "C major, legato, contrary motion, &#9833;=176",
+            "C major, staccato, contrary motion, &#9833;=176",
+            "C harmonic minor, legato, similar motion, &#9833;=176",
+            "C harmonic minor, staccato, similar motion, &#9833;=176",
+            "C melodic minor, legato, similar motion, &#9833;=176",
+            "C melodic minor, staccato, similar motion, &#9833;=176",
+            "C harmonic minor, legato, contrary motion, &#9833;=176",
+            "C harmonic minor, staccato, contrary motion, &#9833;=176",
+            "E&flat; major, legato, similar motion, &#9833;=176",
+            "E&flat; major, staccato, similar motion, &#9833;=176",
+            "E&flat; harmonic minor, legato, similar motion, &#9833;=176",
+            "E&flat; harmonic minor, staccato, similar motion, &#9833;=176",
+            "E&flat; melodic minor, legato, similar motion, &#9833;=176",
+            "E&flat; melodic minor, staccato, similar motion, &#9833;=176",
+            "E&flat; major, legato, contrary motion, &#9833;=176",
+            "E&flat; major, staccato, contrary motion, &#9833;=176",
+            "E&flat; harmonic minor, legato, contrary motion, &#9833;=176",
+            "E&flat; harmonic minor, staccato, contrary motion, &#9833;=176",
+            "F&sharp; major, legato, similar motion, &#9833;=176",
+            "F&sharp; major, staccato, similar motion, &#9833;=176",
+            "F&sharp; harmonic minor, legato, similar motion, &#9833;=176",
+            "F&sharp; harmonic minor, staccato, similar motion, &#9833;=176",
+            "F&sharp; melodic minor, legato, similar motion, &#9833;=176",
+            "F&sharp; melodic minor, staccato, similar motion, &#9833;=176",
+            "F&sharp; major, legato, contrary motion, &#9833;=176",
+            "F&sharp; major, staccato, contrary motion, &#9833;=176",
+            "F&sharp; harmonic minor, legato, contrary motion, &#9833;=176",
+            "F&sharp; harmonic minor, staccato, contrary motion, &#9833;=176",
+            "A major, legato, similar motion, &#9833;=176",
+            "A major, staccato, similar motion, &#9833;=176",
+            "A harmonic minor, legato, similar motion, &#9833;=176",
+            "A harmonic minor, staccato, similar motion, &#9833;=176",
+            "A melodic minor, legato, similar motion, &#9833;=176",
+            "A melodic minor, staccato, similar motion, &#9833;=176",
+            "A major, legato, contrary motion, &#9833;=176",
+            "A major, staccato, contrary motion, &#9833;=176",
+            "A harmonic minor, legato, contrary motion, &#9833;=176",
+            "A harmonic minor, staccato, contrary motion, &#9833;=176",
+            "Whole tone starting on E&flat;, legato, similar motion, &#9833;=176",
+            "Whole tone starting on E&flat;, legato, similar motion, &#9833;=176",
+            "Whole tone starting on C, staccato, similar motion, &#9833;=176",
+            "Whole tone starting on C, staccato, similar motion, &#9833;=176",
+
+            "C major, legato, sixth apart, &#9833;=120",
+            "C major, staccato, sixth apart, &#9833;=120",
+            "C harmonic minor, legato, sixth apart, &#9833;=120",
+            "C harmonic minor, staccato, sixth apart, &#9833;=120",
+            "E&flat; major, legato, sixth apart, &#9833;=120",
+            "E&flat; major, staccato, sixth apart, &#9833;=120",
+            "E&flat; harmonic minor, legato, sixth apart, &#9833;=120",
+            "E&flat; harmonic minor, staccato, sixth apart, &#9833;=120",
+            "F&sharp; major, legato, sixth apart, &#9833;=120",
+            "F&sharp; major, staccato, sixth apart, &#9833;=120",
+            "F&sharp; harmonic minor, legato, sixth apart, &#9833;=120",
+            "F&sharp; harmonic minor, staccato, sixth apart, &#9833;=120",
+            "A major, legato, sixth apart, &#9833;=120",
+            "A major, staccato, sixth apart, &#9833;=120",
+            "A harmonic minor, legato, sixth apart, &#9833;=120",
+            "A harmonic minor, staccato, sixth apart, &#9833;=120",
+            "Chromatic starting on E&flat; and C, legato, similar motion, &#9833;=120",
+            "Chromatic starting on E&flat; and C, staccato, similar motion, &#9833;=120",
+
+            "C major, staccato, in sixths, left hand only, &#9833;=108",
+            "C major, staccato, in sixths, right hand only, &#9833;=108",
+
+            "E&flat; major, legato, in thirds, left hand only, &#9833;=104",
+            "E&flat; major, legato, in thirds, right hand only, &#9833;=104",
+        ];
+
+        var arpeggios = [
+            "C major, legato, second inversion, &#9833;=132",
+            "C major, dominant seventh, legato, &#9833;=132",
+            "C minor, legato, second inversion, &#9833;=132",
+            "E&flat; major, legato, second inversion, &#9833;=132",
+            "E&flat; minor, legato, second inversion, &#9833;=132",
+            "E&flat; major, dominant seventh, legato, &#9833;=132",
+            "F&sharp; major, legato, second inversion, &#9833;=132",
+            "F&sharp; minor, legato, second inversion, &#9833;=132",
+            "F&sharp; major, dominant seventh, legato, &#9833;=132",
+            "A major, legato, second inversion, &#9833;=132",
+            "A minor, legato, second inversion, &#9833;=132",
+            "A major, dominant seventh, legato, &#9833;=132",
+            "Diminished seventh starting on E&flat;, legato, &#9833;=132",
+            "Diminished seventh starting on C, legato, &#9833;=132",
+        ];
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+
+            // While there remain elements to shuffle.
+            while (currentIndex != 0) {
+
+                // Pick a remaining element.
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+
+                // And swap it with the current element.
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+
+            return array;
+        }
+
+        function shuffleScales()
+        {
+            var a = shuffle(scales.slice(0, 44));
+            var b = shuffle(scales.slice(44, 62));
+            var c = shuffle(scales.slice(62, 64));
+            var d = shuffle(scales.slice(64));
+            return a.concat(b).concat(c).concat(d);
+        }
+
+        function resetList() {
+            pos = 0;
+            updateText();
+
+            var nextButton = document.getElementById("nextButton");
+            nextButton.disabled = false;
+            nextButton.innerHTML = "Next";
+        }
+
+        function updateText() {
+            document.getElementById("counterText").innerHTML = (pos + 1) + "/" + currentArray.length;
+
+            if (pos < currentArray.length) {
+                document.getElementById("scaleArpText").innerHTML = currentArray[pos];
+            }
+
+            if (pos == currentArray.length - 1) {
+                var nextButton = document.getElementById("nextButton");
+                nextButton.disabled = true;
+                nextButton.innerHTML = "Finished!";
+
+                document.getElementById("scalesButton").disabled = false;
+                document.getElementById("arpeggiosButton").disabled = false;
+            }
+            else {
+                document.getElementById("scalesButton").disabled = true;
+                document.getElementById("arpeggiosButton").disabled = true;
+            }
+        }
+
+        function handleScalesButton() {
+            currentArray = shuffleScales();
+            resetList();
+            document.getElementById("scalesButton").disabled = true;
+            document.getElementById("arpeggiosButton").disabled = false;
+        }
+
+        function handleArpeggiosButton() {
+            currentArray = shuffle(arpeggios);
+            resetList();
+            document.getElementById("scalesButton").disabled = false;
+            document.getElementById("arpeggiosButton").disabled = true;
+        }
+
+        function handleNextButton() {
+            pos++;
+            updateText();
+        }
+
+        handleScalesButton();
+
+    </script>
+</body>
+
+</html>
